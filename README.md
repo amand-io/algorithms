@@ -1,7 +1,7 @@
 # algorithms
 Algoritmos Aprendidos
 
-##**Grafo**:
+## **Grafo**:
 - Dijkstra.
 - Kruskal.
 - Union Find.
