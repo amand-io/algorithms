@@ -1,7 +1,7 @@
 # algorithms
 Algoritmos Aprendidos
 
-## **Grafo**:
+## **Grafos**:
 - BFS (normal e para matriz).
 - DFS.
 - Dijkstra.
