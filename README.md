@@ -7,4 +7,4 @@ Algoritmos Aprendidos
 - Dijkstra.
 - Kruskal.
 - Union Find.
-- Ciclo Find.
+- Cycle Find.
