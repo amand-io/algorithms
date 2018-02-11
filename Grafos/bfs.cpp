@@ -12,6 +12,8 @@ void bfs(int no){
 
     vis[no] = true;
     dist[no] = 1;
+    
+    q.psuh(no);
     while(!q.empty()){
         int top = q.front();
         q.pop();
