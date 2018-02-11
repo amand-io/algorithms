@@ -18,6 +18,8 @@ void bfs(di no){
 
     vis[(no.first*m) + no.second] = true;
     dist[(no.first*m) + no.second] = 1;
+    
+    q.push(no);
     while(!q.empty()){
         di top = q.front();
         q.pop();
