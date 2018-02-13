@@ -17,3 +17,6 @@ Algoritmos Aprendidos
  - Exponenciação rapida.
  - Divisores.
  
+ ## **Strings**:
+ - Automato de Sufixo
+ - Trie
