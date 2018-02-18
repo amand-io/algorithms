@@ -20,3 +20,8 @@ Algoritmos Aprendidos
  ## **Strings**:
  - Automato de Sufixo
  - Trie
+ - Z Function
+ - KMP
+ 
+ ## **Estrutura de Dados**:
+ - BIT
