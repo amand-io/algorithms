@@ -25,3 +25,6 @@ Algoritmos Aprendidos
  
  ## **Estrutura de Dados**:
  - BIT
+ 
+ ## **Busca**:
+ - Binary Search
