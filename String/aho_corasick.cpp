@@ -1,55 +1,74 @@
 #include <bits/stdc++.h>
-#define alpha 26
-
+#define MAX 1000007
+#define SIG 27
+#define INI '0'
 using namespace std;
 
-struct node{
-    int word[alpha], go[alpha];
-    int link = -1;
-    int parent = -1;
-    char parentC;
-    bool end = false; 
+struct Aho{
+    int states;
+    int words[MAX][SIG];
+    int out[MAX], fail[MAX];
 
-    node(int parent = -1, char parentC = '$') : parent(parent), parentC(parentC) {
-        fill(word.begin(),word.end(), -1);
-        fill(go.begin(),go.end(), -1);
+    Aho(){
+        states = 0;
+        memset(out, 0, sizeof out);
+        memset(fail, -1, sizeof fail);
+        memset(words, -1, sizeof words);
     }
-};
 
-vector<node> ac(1);
+    void add(string &s){
+        int curr = 0;
+        for(int i = 0; i < s.size(); i++){
+            int letter = s[i]-INI;
+            if(words[curr][letter] == -1){
+                words[curr][letter] = ++states;
+            }
 
-void add(string s){
-    int current = 0;
-    for(int i = 0; i < s.size(); i++){
-        int c = s[i]-'a';
-        if(ac[current].word[c] == -1){
-            ac[current].word[c] = ac.size();
-            ac.emplace_back(current, s[i]);
+            curr = words[curr][letter];
         }
 
-        current = ac[current].word[c];
+        out[curr] = 1;
     }
-    ac[current].end = true;
-}
 
-int go(int v, char ch);
+    void build(){
+        queue<int> q;
 
-int link(int v){
-    if(ac[v].link == -1){
-        if(v == 0 || ac[v].parent == 0) ac[v].link = 0;
-        else ac[v].link = go(link(ac[v].parent), ac[v].parentC);
+        for(int i = 0; i < SIG; i++){
+            if(words[0][i] == -1) words[0][i] = 0;
+            else {
+                fail[words[0][i]] = 0;
+                q.push(words[0][i]);
+            }
+        }
+
+        while(!q.empty()){
+            int actual = q.front();
+            q.pop();
+
+            for(int i = 0; i < SIG; i++){
+                int parent = words[actual][i];
+                if(words[actual][i] != -1){
+                    int failure = fail[actual];
+                    while(words[failure][i] == -1) failure = fail[failure];
+
+                    failure = words[failure][i];
+                    fail[parent] = failure;
+                    out[parent] |= out[failure];
+                    q.push(parent);
+                }
+            }
+        }
     }
-    return ac[v].link;
-}
 
-int go(int v, char ch){
-    int c = ch-'a';
-    if(ac[v].go[c] == -1){
-        if(ac[v].next[c] != -1) ac[v].go[c] = ac[v].next[c];
-        else ac[v].go[c] = v == 0 ? 0 : go(link(v), ch); 
+    int next(int state, int letter){
+        while(words[state][letter] == -1){
+            state = fail[state];
+        }
+        return words[state][letter];
     }
-    return ac[v].go[c];
-}
+};
+Aho mine;
 int main(){
+
     return 0;
 }
