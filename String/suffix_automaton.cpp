@@ -37,8 +37,8 @@ void add(char c){
 			for(; last != -1 && st[last].next[c] == q; last = st[last].link) st[last].next[c] = clone;
 			st[q].link = st[cur].link = clone;
 		}
-		last = cur;
 	}
+	last = cur;
 }
 int main(){
 	string palavra; cin >> palavra;
