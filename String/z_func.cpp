@@ -4,29 +4,20 @@
 using namespace std;
 
 int z[MAX];
-string txt;
+string s;
 
 void func(){
 	int l = 0, r = 0;
-
-	for(int i = 1; i < txt.size(); i++){
-		if(i > r){
-			l = r = i;
-			while( r < txt.size() && txt[r] == txt[r-l]) r++;
-			z[i] = r-l; r--;
-		}else{
-			int  k = i-l;
-			if(z[k] < r-i+1) z[i] = z[k];
-			else{
-				l = i;
-				while( r < txt.size() && txt[r] == txt[r-l]) r++;
-				z[i] = r-l; r--;
-			}
+	for(int i = 1; i < s.size(); i++){
+		z[i] = max(0, min(z[i-l], r-i+1));
+		while(i+z[i] < s.size() && s[z[i]] == s[i+z[i]]){
+			l = i; r = i+z[i]; z[i]++;
 		}
 	}
+	z[0] = s.size();
 }
 int main(){
-	cin >> txt;
+	cin >> s;
 	func();
 	return 0;
 }
