@@ -6,8 +6,7 @@
 using namespace std;
 
 
-vector<int> suffix_array(string s)
-{
+vector<int> suffix_array(string s){
     int n = s.size(), N = n + 256;
     vector<int> sa(n), ra(n);
     for(int i = 0; i < n; i++) sa[i] = i, ra[i] = s[i];
@@ -48,7 +47,7 @@ char s[MAX];
 int main(){
     //cout << "oe\n";
     scanf(" %s", s);
-    vector<int> arr = build(s);
+    vector<int> arr = suffix_array(s + '$');
     int n = strlen(s) + 1;
     for(int i = 0; i < arr.size(); i++) printf("%d\n", arr[i]);
     return 0;

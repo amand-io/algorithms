@@ -69,9 +69,7 @@ int main(){
     string txt; cin >> txt;
     n = txt.size();
     init();
-    //cout << "ola\n";
     getHash(txt);
-    //cout << "oi\n";
     int k; cin >> k;
     while(k--){
         int tipo; cin >> tipo;
