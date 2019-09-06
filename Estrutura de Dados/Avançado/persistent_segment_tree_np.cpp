@@ -12,36 +12,36 @@ struct Node {
 } st[100*MAX];
 
 int ptr = 1;
- 
+
+int nl(int value, int l, int r) {
+    int p = ++ptr;
+    st[p].l = l;
+	st[p].r = r;
+    st[p].qt = value;
+    return p;
+}
+
 int update(int node, int l, int r, int p, int v){
 	if(p < l || r < p) return node; 
-	if(l == r){
-		st[ptr].qt = st[node].qt + v;
-        st[ptr].l = st[node].l;
-        st[ptr].r = st[node].r;
-		return ptr++;
-	}
+	if(l == r) return nl(st[node].qt + v, st[node].l, st[node].r);
 
 	int mid = (l+r)>>1;
 	int fe = update(st[node].l, l, mid, p, v);
 	int fd = update(st[node].r, mid+1,r,p, v);
 
-	st[ptr].qt = st[fe].qt + st[fd].qt;
-    st[ptr].l = fe;
-    st[ptr].r = fd;
-	return ptr++;
+	return nl(st[fe].qt + st[fd].qt, fe, fd);
 }
+
+int cpy(int node, int ins, int l, int r, int x, int y){
+    if(y < l || r < x) return node;
+    if(x <= l && r <= y) return ins;
  
-int query(int a, int b, int l, int r, int k){
-	if(l==r) return l;
+    int mid = (l+r)>>1;
+    int fe = cpy(st[node].l, st[ins].l, l, mid, x, y);
+    int fd = cpy(st[node].r, st[ins].r, mid+1,r,x, y);
 
-	int mid = (l+r)>>1;
-
-	int vv = st[st[b].l].qt - st[st[a].l].qt;
-	if(vv >= k) return query(st[a].l, st[b].l, l, mid, k);
-	return query(st[a].r, st[b].r, mid+1, r, k-vv);
+    return nl(st[fe].qt + st[fd].qt, fe, fd);
 }
-
 int main(){
 	return 0;
 }

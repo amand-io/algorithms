@@ -10,7 +10,7 @@ void update(int idx, int val){
 
 int query(int idx){
     int sum = 0;
-    for(; idx > 0; idx += (idx&-idx)) sum += bit[idx];
+    for(; idx > 0; idx -= (idx&-idx)) sum += bit[idx];
     return sum;
 }
 
