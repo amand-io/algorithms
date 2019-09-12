@@ -1,76 +1,107 @@
 #include <bits/stdc++.h>
-#define MAX 200007
-#define SIG 27
-#define INI 'a'
+#define MAX 400400
 
 using namespace std;
-typedef long long ll;
 
-struct AC {
-	int next[MAX][SIG], fail[MAX];
-	ll end[MAX], cnt[MAX];
+struct AHO {
+    int c = 1;
+    int to[MAX][26];
+    int fail[MAX];
+    
+    void init(){
+        memset(to, 0, sizeof to);
+        memset(fail, 0, sizeof fail);
+    }
+    int add(const string &str) {
+    	int on = 0;
+    	for(auto ch : str) {
+    		if(to[on][ch-'a'] == 0) {
+    			to[on][ch-'a'] = c++;
+    		}
+    		on = to[on][ch-'a'];
+    	}
+    	return on;
+    }
+    
+    void build() {
+    	queue<int> que;
+    	que.push(0);
+    	while(!que.empty()) {
+    		int on = que.front();
+    		que.pop();
+    		for(int i = 0; i < 26; i++) {
+    			if(to[on][i]) {
+    				fail[to[on][i]] = on == 0 ? 0 : to[fail[on]][i];
+    				que.push(to[on][i]);
+    			} else {
+    				to[on][i] = to[fail[on]][i];
+    			}
+    		}
+    	}
+    }
+} dict;
 
-	int root, L;
-	int newNode() {
-		for(int i = 0; i < SIG; i++) next[L][i] = -1;
-		end[L++] = 0;
-		return L-1;
+struct BIT {} tree;
+
+vector<int> edges[MAX];
+int in[MAX], out[MAX], tt = 0;
+
+// make a graph of fails
+void dfs(int on) {
+	in[on] = tt++;
+	for(auto too : edges[on]) {
+		dfs(too);
 	}
-	void init() {
-		L = 0;
-		root = newNode();
+	out[on] = tt;
+}
+
+int ans[MAX];
+vector<pair<int, int>> graph2[MAX];
+vector<pair<int, int>> qries[MAX];
+
+// count the number of occurrences of string t in si
+void solve(int on, int st) {
+	tree.upd(in[st]+1, 1);
+	for(auto e : graph2[on]) {
+		solve(e.first, dict.to[st][e.second]);
 	}
-	void add(char buf[]) {
-		int len = strlen(buf);
-		int now = root;
-		for(int i = 0; i < len; i++) {
-			if(next[now][buf[i]-INI] == -1) next[now][buf[i]-INI] = newNode();
-			now = next[now][buf[i]-INI];
-		}
-		end[now]++;
+	for(auto q : qries[on]) {
+		ans[q.first] = tree.qry(out[q.second]) - tree.qry(in[q.second]);
 	}
-	void build() {
-		queue<int> que;
-		fail[root] = root;
-		for(int i = 0; i < SIG; i++) {
-			if(next[root][i] == -1) next[root][i] = root;
-			else {
-				fail[next[root][i]] = root;
-				que.push(next[root][i]);
-			}
-		}
-		while(!que.empty()) {
-			int now = que.front();
-			que.pop();
-			for(int i = 0; i < SIG; i++) {
-				if(next[now][i] == -1) next[now][i] = next[fail[now]][i];
-				else {
-					fail[next[now][i]] = next[fail[now]][i];
-					end[next[now][i]] += end[next[fail[now]][i]];
-					que.push(next[now][i]);
-				}
-			}
-		}
-	}
-	void matches(char buf[]) {
-		int len = strlen(buf);
-		int now = root;
-		for(int i = 0; i < len; i++) {
-			now = next[now][buf[i]-INI];
-			cnt[i] = end[now];
-		}
-	}
-	void debug() {
-		for(int i = 0; i < L; i++) {
-			printf("id = %3d, fail = %3d, end = %3d, chi = [", i, fail[i], end[i]);
-			for(int j = 0; j < SIG; j++) printf("%2d", next[i][j]);
-			printf("]\n");
-		}
-	}
-};
- 
-AC ac;
+	tree.upd(in[st]+1, -1);
+}
+
 int main() {
-	ac.init(); ac.build();
-    return 0;
+	ios_base::sync_with_stdio(false); cin.tie(NULL);
+	int n;
+	cin >> n;
+	dict.init();
+	for(int i = 1; i <= n; i++) {
+		int t; cin >> t;
+		char ch;
+		int ha;
+		if(t == 1) {
+			cin >> ch;
+			ha = 0;
+		} else {
+			cin >> ha >> ch;
+		}
+		graph2[ha].emplace_back(i, ch-'a');
+	}
+	int m; cin >> m;
+	for(int i = 0; i < m; i++) {
+		int on; cin >> on;
+		string str; cin >> str;
+		qries[on].emplace_back(i, dict.add(str));
+	}
+	dict.build();
+	for(int i = 1; i < dict.c; i++) {
+		edges[dict.fail[i]].push_back(i);
+	}
+	dfs(0);
+	tree.init(dict.c + 10);
+	solve(0, 0);
+	for(int i = 0; i < m; i++) {
+		cout << ans[i] << '\n';
+	}
 }

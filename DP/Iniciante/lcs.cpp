@@ -3,21 +3,24 @@
 
 using namespace std;
 
-int dp[MAX][MAX];
-
+int dp[2][MAX];
 string s, t;
-int solve(int x, int y){
-    if(x < 0 || y < 0) return 0;
-    if(dp[x][y] != -1) return dp[x][y];
+int solve(int n, int m){
+    memset(dp, 0, sizeof dp);
+    int b;
+	for(int i = 1; i <= n; i++){
+		b = i&1; 
+		for(int j = 1; j <= m; j++){
+			if(i == 0 || j == 0) dp[b][j] = 0;
+			else if(s[i-1] == t[j-1]) dp[b][j] = dp[1-b][j-1] + 1;
+			else dp[b][j] = max(dp[1-b][j], dp[b][j-1]);
+		}
+	}
 
-    int ans = (s[x] == t[y]) ? (1 + solve(x-1, y-1)): 
-                               max(solve(x, y-1), solve(x-1, y));
-
-    return dp[x][y] = ans;
+    return dp[n][m];
 }
 int main(){
     cin >> s >> t;
-    memset(dp, -1, sizeof dp);
     cout << solve(s.size()-1, t.size()-1) << endl;
     return 0;
 }
