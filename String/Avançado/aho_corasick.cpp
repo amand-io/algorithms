@@ -1,107 +1,126 @@
+// by: Emiso
 #include <bits/stdc++.h>
-#define MAX 400400
+#define MAX 1000100
+#define ALP 26
 
 using namespace std;
 
-struct AHO {
-    int c = 1;
-    int to[MAX][26];
-    int fail[MAX];
-    
-    void init(){
-        memset(to, 0, sizeof to);
-        memset(fail, 0, sizeof fail);
+int C(char c) { return c - 'a'; }
+
+struct aho {
+    int parent[MAX], suffix[MAX], to[MAX][ALP], super[MAX];
+    char from[MAX];
+    int id[MAX], cnt, built;
+    long long ending[MAX], lazy[MAX];
+
+    int new_node(int _parent = 0, char _from = ' ') {
+        parent[cnt] = _parent; from[cnt] = _from; id[cnt] = -1;
+        suffix[cnt] = super[cnt] = ending[cnt] = lazy[cnt] = 0;
+        for(int i = 0; i < ALP; i++) to[cnt][i] = 0;
+        return cnt++;
     }
-    int add(const string &str) {
-    	int on = 0;
-    	for(auto ch : str) {
-    		if(to[on][ch-'a'] == 0) {
-    			to[on][ch-'a'] = c++;
-    		}
-    		on = to[on][ch-'a'];
-    	}
-    	return on;
+
+    aho() {
+        cnt = built = 0;
+        new_node();
     }
-    
+
+    int add(string &word, int _id = 0) {
+        int node = 0;
+        for(int i = 0; i < word.size(); i++) {
+            int nxt = C(word[i]);
+            if(!to[node][nxt]) to[node][nxt] = new_node(node, word[i]);
+            node = to[node][nxt];
+        }
+        ending[node]++;
+        if(id[node] == -1) id[node] = _id;
+        return id[node];
+    }
+
     void build() {
-    	queue<int> que;
-    	que.push(0);
-    	while(!que.empty()) {
-    		int on = que.front();
-    		que.pop();
-    		for(int i = 0; i < 26; i++) {
-    			if(to[on][i]) {
-    				fail[to[on][i]] = on == 0 ? 0 : to[fail[on]][i];
-    				que.push(to[on][i]);
-    			} else {
-    				to[on][i] = to[fail[on]][i];
-    			}
-    		}
-    	}
+        built = 1;
+        queue<int> q;
+        for(int i = 0; i < ALP; i++)
+            if(to[0][i]) q.push(to[0][i]);
+
+        while(!q.empty()) {
+            int v = q.front(); q.pop();
+            if(parent[v]) suffix[v] = to[suffix[parent[v]]][C(from[v])];
+
+            if(id[v] != -1) super[v] = v;
+            else super[v] = super[suffix[v]];
+
+            ending[v] += ending[suffix[v]];
+            for(int i = 0; i < ALP; i++) {
+                if(!to[v][i]) to[v][i] = to[suffix[v]][i];
+                else q.push(to[v][i]);
+            }
+        }
+    }
+
+    long long search_text(string &text) {
+        if(!built) build();
+        int prefix = 0;
+        long long count = ending[0];
+        for(char c : text) {
+            prefix = to[prefix][C(c)];
+            count += ending[prefix];
+        }
+        return count;
+    }
+
+    /// array of number of occurrences of pattern with id = i
+    void search_text(string &text, int *ans) {
+        if(!built) build();
+        int prefix = 0;
+        for(char c : text) {
+            prefix = to[prefix][C(c)];
+            for(int u = super[prefix]; u; u = super[suffix[u]])
+                ans[id[u]]++;
+        }
+    }
+
+    void search_text_linear(string &text, int *ans) { /// O(N+M)
+        if(!built) build();
+        int prefix = 0;
+        for(char c : text) {
+            prefix = to[prefix][C(c)];
+            lazy[prefix]++;
+        }
+        push_lazy(ans);
+    }
+
+    void push_lazy(int *ans) {
+        vector<int> deg(cnt, 0);
+        for(int i = 1; i < cnt; i++)
+            deg[suffix[i]]++;
+
+        queue<int> fila;
+        for(int i = 1; i < cnt; i++)
+            if(deg[i] == 0) fila.push(i);
+
+        while(!fila.empty()) {
+            int u = fila.front(); fila.pop();
+
+            if(id[u] != -1) ans[id[u]] += lazy[u];
+            lazy[suffix[u]] += lazy[u];
+
+            deg[suffix[u]]--;
+            if(suffix[u] && deg[suffix[u]] == 0) fila.push(suffix[u]);
+        }
     }
 } dict;
 
-struct BIT {} tree;
-
-vector<int> edges[MAX];
-int in[MAX], out[MAX], tt = 0;
-
-// make a graph of fails
-void dfs(int on) {
-	in[on] = tt++;
-	for(auto too : edges[on]) {
-		dfs(too);
-	}
-	out[on] = tt;
-}
-
-int ans[MAX];
-vector<pair<int, int>> graph2[MAX];
-vector<pair<int, int>> qries[MAX];
-
-// count the number of occurrences of string t in si
-void solve(int on, int st) {
-	tree.upd(in[st]+1, 1);
-	for(auto e : graph2[on]) {
-		solve(e.first, dict.to[st][e.second]);
-	}
-	for(auto q : qries[on]) {
-		ans[q.first] = tree.qry(out[q.second]) - tree.qry(in[q.second]);
-	}
-	tree.upd(in[st]+1, -1);
-}
-
 int main() {
-	ios_base::sync_with_stdio(false); cin.tie(NULL);
-	int n;
-	cin >> n;
-	dict.init();
-	for(int i = 1; i <= n; i++) {
-		int t; cin >> t;
-		char ch;
-		int ha;
-		if(t == 1) {
-			cin >> ch;
-			ha = 0;
-		} else {
-			cin >> ha >> ch;
-		}
-		graph2[ha].emplace_back(i, ch-'a');
-	}
-	int m; cin >> m;
-	for(int i = 0; i < m; i++) {
-		int on; cin >> on;
-		string str; cin >> str;
-		qries[on].emplace_back(i, dict.add(str));
-	}
-	dict.build();
-	for(int i = 1; i < dict.c; i++) {
-		edges[dict.fail[i]].push_back(i);
-	}
-	dfs(0);
-	tree.init(dict.c + 10);
-	solve(0, 0);
-	for(int i = 0; i < m; i++) {
-		cout << ans[i] << '\n';
-	}
+    string str = "aa";
+    dict.add(str);
+
+    str = "a";
+    dict.add(str);
+
+    dict.build();
+
+    string cmon = "aaaaa";
+    printf("%d\n", dict.search_text(cmon));
+    return 0;
 }
